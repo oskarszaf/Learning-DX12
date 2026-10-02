@@ -170,7 +170,7 @@ void D3DApp::LoadAssets()
 	{
 		Microsoft::WRL::ComPtr<ID3DBlob> vertexShader, vsErrors;
 		Microsoft::WRL::ComPtr<ID3DBlob> pixelShader, psErrors;
-		std::wstring filename = L"C:\\dev\\directxprogramming\\directxprogramming\\Common\\shaders.hlsl";
+		std::wstring filename = L"C:Common\\shaders.hlsl";
 		std::string entrypointVS = "VSMain";
 		std::string entrypointPS = "PSMain";
 		std::string targetVS = "vs_5_0";
