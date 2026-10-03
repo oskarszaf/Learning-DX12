@@ -1,4 +1,4 @@
-#include "d3dApp.h"
+#include "triangle.h"
 #define D3DCOMPILE_DEBUG 1
 
 static TCHAR szWindowClass[] = _T("App");
@@ -13,7 +13,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	UINT width = 800;
 	UINT height = 600;
 	float aspectRatio =(float) width / height;
-	D3DApp win(width,height,aspectRatio);
+	std::vector<Vertex> triangleVertices =
+	{
+		{{0.0f, 0.25f * aspectRatio, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+		{{0.25f, -0.25f * aspectRatio, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+		{{-0.250f, -0.25f * aspectRatio, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+	};
+	TriangleWindow win(width,height,aspectRatio, triangleVertices);
 
 	if (!win.Create(
 		L"Yeah", WS_OVERLAPPEDWINDOW, 0, CW_USEDEFAULT, CW_USEDEFAULT, width, height))

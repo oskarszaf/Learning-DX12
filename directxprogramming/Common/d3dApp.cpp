@@ -239,7 +239,7 @@ void D3DApp::LoadAssets()
 	ThrowIfFailed(m_commandList->Close());
 
 	// 7. Create + load vertex buffers
-	{
+	 {
 		// Define triangle geometry
 		Vertex triangleVertices[] =
 		{
@@ -255,7 +255,7 @@ void D3DApp::LoadAssets()
 		// over. Please read up on Default Heap usage. An upload heap is used here for 
 		// code simplicity and because there are very few verts to actually transfer.
 		CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
-		auto desc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
+		auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(Vertex));
 		ThrowIfFailed(m_device->CreateCommittedResource(
 		&heapProps,
 			D3D12_HEAP_FLAG_NONE,
@@ -276,7 +276,7 @@ void D3DApp::LoadAssets()
 		// 8. Create vertex buffer views
 		m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
 		m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-		m_vertexBufferView.SizeInBytes = vertexBufferSize;
+		m_vertexBufferView.SizeInBytes = sizeof(Vertex);
 	}
 	
 	// Create sync objects and wait until assets have been uploaded to the GPU

@@ -117,6 +117,12 @@ public:
 		
 };
 
+struct Vertex
+{
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT4 color;
+};
+
 class D3DApp : public BaseWindow<D3DApp>
 {
 public:
@@ -138,15 +144,13 @@ public:
 	void Render();
 	void Destroy();
 
-private:
+	
+
+protected:
 
 	static const UINT FrameCount = 2;
 
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT4 color;
-	};
+	
 	
 	boolean m_useWarpDevice;
 	UINT m_width;
