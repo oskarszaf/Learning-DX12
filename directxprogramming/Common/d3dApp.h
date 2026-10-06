@@ -137,7 +137,8 @@ public:
 		m_viewport{0.0f,0.0f,static_cast<float>(width),static_cast<float>(height),0.0f,1.0f },
 		m_scissorRect{ 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) },
 		m_rtvDescriptorSize(0),
-		m_useWarpDevice(false) {}
+		m_DsvDescriptorSize(0),
+		m_CbvSrvDescriptorSize(0) {}
 
 	void InitDX12();
 	void Update();
@@ -149,10 +150,9 @@ public:
 protected:
 
 	static const UINT FrameCount = 2;
-
 	
 	
-	boolean m_useWarpDevice;
+	//boolean m_useWarpDevice;
 	UINT m_width;
 	UINT m_height;
 	float m_aspectRatio;
@@ -166,9 +166,15 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_commandQueue;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rootSignature;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipelineState;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
 	UINT m_rtvDescriptorSize;
+	UINT m_DsvDescriptorSize;
+	UINT m_CbvSrvDescriptorSize;
+
+	bool      m_4xMsaaState = false;    // 4X MSAA enabled
+	UINT      m_4xMsaaQuality = 0;      // quality level of 4X MSAA
 
 	// App resources
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_vertexBuffer;
@@ -184,6 +190,8 @@ protected:
 	void LoadAssets();
 	void PopulateCommandList();
 	void WaitForPreviousFrame();
+	void CreateSwapChain(Microsoft::WRL::ComPtr<IDXGIFactory4> factory);
+	void CreateRtvAndDsvDescriptorHeaps();
 
 	
 };
