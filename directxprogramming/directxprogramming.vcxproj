@@ -24,6 +24,7 @@
     <ClInclude Include="Common\d3dUtil.h" />
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="Common\DDSTextureLoader12.h" />
+    <ClInclude Include="Common\GameTimer.h" />
     <ClInclude Include="Common\MathHelper.h" />
     <ClInclude Include="Common\triangle.h" />
   </ItemGroup>
@@ -32,6 +33,7 @@
     <ClCompile Include="Common\d3dApp.cpp" />
     <ClCompile Include="Common\d3dUtil.cpp" />
     <ClCompile Include="Common\DDSTextureLoader12.cpp" />
+    <ClCompile Include="Common\GameTimer.cpp" />
     <ClCompile Include="Common\MathHelper.cpp" />
     <ClCompile Include="Common\triangle.cpp" />
   </ItemGroup>

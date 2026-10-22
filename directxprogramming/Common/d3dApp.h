@@ -18,6 +18,7 @@
 #include <string>
 #include <iostream>
 #include "d3dUtil.h"
+#include "GameTimer.h"
 
 template <class DERIVED_TYPE>
 class BaseWindow
@@ -145,6 +146,17 @@ public:
 	void Render();
 	void Destroy();
 
+	void CalculateFrameStats();
+
+	GameTimer* getTimer()
+	{
+		return &m_timer;
+	}
+
+	bool paused()
+	{
+		return m_appPaused;
+	}
 	
 
 protected:
@@ -153,9 +165,15 @@ protected:
 	
 	
 	//boolean m_useWarpDevice;
-	UINT m_width;
-	UINT m_height;
+	int m_width;
+	int m_height;
+	std::wstring m_windowCaption = L"Triangle: ";
 	float m_aspectRatio;
+	bool m_minimized = false;
+	bool m_maximized = false;
+	bool m_resizing = false;
+	bool m_appPaused = false;
+
 	// Pipeline objects
 	D3D12_VIEWPORT m_viewport;
 	D3D12_RECT m_scissorRect;
@@ -169,6 +187,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipelineState;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_depthStencilBuffer;
 	UINT m_rtvDescriptorSize;
 	UINT m_DsvDescriptorSize;
 	UINT m_CbvSrvDescriptorSize;
@@ -186,12 +205,16 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
 	UINT64 m_fenceValue;
 
+	GameTimer m_timer;
+
 	void LoadPipeline();
 	void LoadAssets();
 	void PopulateCommandList();
 	void WaitForPreviousFrame();
 	void CreateSwapChain(Microsoft::WRL::ComPtr<IDXGIFactory4> factory);
 	void CreateRtvAndDsvDescriptorHeaps();
+	void OnResize();
+	void FlushCommandQueue();
 
 	
 };

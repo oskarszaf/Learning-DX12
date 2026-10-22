@@ -35,12 +35,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	ShowWindow(win.Window(), nCmdShow);
 
 	//Message loop
-	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0))
+	MSG msg = { 0 };
+	win.getTimer()->Reset();
+	while (msg.message != WM_QUIT)
+	{
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			win.getTimer()->Tick();
+			if (!win.paused())
+			{
+				win.CalculateFrameStats();
+				win.Update();
+				win.Render();
+			}
+			else
+			{
+				Sleep(100);
+			}
+		}
+	}
+	/*while (GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-	}
+	}*/
 
 	win.Destroy();
 
