@@ -64,13 +64,13 @@ LRESULT D3DApp::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_ENTERSIZEMOVE:
 		m_appPaused = true;
 		m_resizing = true;
-		//m_timer.Stop();
+		m_timer.Stop();
 		return 0;
 
 	case WM_EXITSIZEMOVE:
 		m_appPaused = false;
 		m_resizing = false;
-		//m_timer.Start();
+		m_timer.Start();
 		OnResize();
 		return 0;
 

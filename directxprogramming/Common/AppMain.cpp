@@ -19,53 +19,61 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 		{{0.25f, -0.25f * aspectRatio, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
 		{{-0.250f, -0.25f * aspectRatio, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
 	};
-	D3DApp win(width,height,aspectRatio);
-
-	if (!win.Create(
-		L"Yeah", WS_OVERLAPPEDWINDOW, 0, CW_USEDEFAULT, CW_USEDEFAULT, width, height))
+	try
 	{
-		MessageBox(NULL, L"Creating window failed", L"What", 0);
-		return 0;
-	}
+		D3DApp win(width, height, aspectRatio);
 
-	hInst = hInstance;
-	win.InitDX12();
-	
-	// Show window
-	ShowWindow(win.Window(), nCmdShow);
-
-	//Message loop
-	MSG msg = { 0 };
-	win.getTimer()->Reset();
-	while (msg.message != WM_QUIT)
-	{
-		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		if (!win.Create(
+			L"Yeah", WS_OVERLAPPEDWINDOW, 0, CW_USEDEFAULT, CW_USEDEFAULT, width, height))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			MessageBox(NULL, L"Creating window failed", L"What", 0);
+			return 0;
 		}
-		else
+
+		hInst = hInstance;
+		win.InitDX12();
+
+		// Show window
+		ShowWindow(win.Window(), nCmdShow);
+
+		//Message loop
+		MSG msg = { 0 };
+		win.getTimer()->Reset();
+		while (msg.message != WM_QUIT)
 		{
-			win.getTimer()->Tick();
-			if (!win.paused())
+			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 			{
-				win.CalculateFrameStats();
-				win.Update();
-				win.Render();
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
 			}
 			else
 			{
-				Sleep(100);
+				win.getTimer()->Tick();
+				if (!win.paused())
+				{
+					win.CalculateFrameStats();
+					win.Update();
+					win.Render();
+				}
+				else
+				{
+					Sleep(100);
+				}
 			}
 		}
+		/*while (GetMessage(&msg, NULL, 0, 0))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}*/
+
+		win.Destroy();
+
+		return (int)msg.wParam;
 	}
-	/*while (GetMessage(&msg, NULL, 0, 0))
+	catch (DxException& e)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}*/
-
-	win.Destroy();
-
-	return (int)msg.wParam;
+		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		return 0;
+	}
 }
