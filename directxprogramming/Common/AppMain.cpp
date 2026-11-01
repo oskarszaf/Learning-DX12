@@ -1,4 +1,5 @@
 #include "triangle.h"
+#include "../ObjectUtils/objutils.h"
 #define D3DCOMPILE_DEBUG 1
 
 static TCHAR szWindowClass[] = _T("App");
@@ -19,6 +20,47 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 		{{0.25f, -0.25f * aspectRatio, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
 		{{-0.250f, -0.25f * aspectRatio, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
 	};
+
+	//Object stanfordBunny; 
+	//stanfordBunny.getObjectFromObj("Objects\\stanford-bunny.obj");
+	//DXObject DXstanfordBunny{ stanfordBunny };
+
+	DXObject cube;
+	std::vector<DXVertex> vertexBuffer = {
+		{{-1,-1,-1,1},{0,0,0}},
+		{{-1,1, -1,1},{0,0,0}},
+		{{1, 1,-1,1},{0,0,0}},
+		{{1, -1, -1,1},{0,0,0}},
+		{{ -1,-1,1,1},{0,0,0}},
+		{{ -1,+1, 1,1},{0,0,0}},
+		{{ 1, 1,1,1},{0,0,0}},
+		{{ 1, -1, 1,1},{0,0,0}}
+	};
+	std::vector<unsigned int> indexBuffer = {
+		0, 1, 2,
+		0, 2, 3,
+
+		4, 6, 5,
+		4, 7, 6,
+
+		4, 5, 1,
+		4, 1, 0,
+
+		3, 2, 6,
+		3, 6, 7,
+		// top face
+		1, 5, 6,
+		1, 6, 2,
+		// bottom face
+		4, 0, 3,
+		4, 3, 7
+	};
+
+	cube.vertexBuffer = vertexBuffer;
+	cube.indexBuffer = indexBuffer;
+	cube.calcNormalsFromIndexBuffer(3);
+
+
 	try
 	{
 		D3DApp win(width, height, aspectRatio);
@@ -61,11 +103,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 				}
 			}
 		}
-		/*while (GetMessage(&msg, NULL, 0, 0))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}*/
 
 		win.Destroy();
 

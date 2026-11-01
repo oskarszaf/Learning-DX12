@@ -39,6 +39,9 @@
     <ClInclude Include="Common\GameTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectUtils\objutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\d3dApp.cpp">
