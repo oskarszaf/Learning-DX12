@@ -1,9 +1,12 @@
 #include "d3dApp.h"
+#include <windowsx.h>
 
 void GetHardwareAdapter(
 	IDXGIFactory1* pFactory,
 	IDXGIAdapter1** ppAdapter,
 	bool requestHighPerformanceAdapter);
+
+D3DApp::~D3DApp(){}
 
 LRESULT D3DApp::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -13,9 +16,21 @@ LRESULT D3DApp::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
+	case WM_ACTIVATE:
+		if (LOWORD(wParam) == WA_INACTIVE)
+		{
+			m_appPaused = true;
+			m_timer.Stop();
+		}
+		else
+		{
+			m_appPaused = false;
+			m_timer.Start();
+		}
+		return 0;
 	case WM_PAINT:
-		Update();
-		Render();
+		Update(m_timer);
+		Render(m_timer);
 		return 0;
 	case WM_SIZE:
 		m_width = LOWORD(lParam);
@@ -83,6 +98,31 @@ LRESULT D3DApp::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
+
+	case WM_MENUCHAR:
+		return MAKELRESULT(0, MNC_CLOSE);
+	/*case WM_GETMINMAXINFO :
+		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
+		((MINMAXINFO*)wParam)->ptMinTrackSize.y = 200;
+		return 0;*/
+	case WM_LBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	case WM_MOUSEMOVE:
+		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	case WM_KEYUP:
+		if (wParam == VK_ESCAPE)
+		{
+			PostQuitMessage(0);
+		}
+		else if ((int)wParam == VK_F2)
+		{
+			Set4xMsaaState(!m_4xMsaaState);
+		}
+		return 0;
 	default:
 		return DefWindowProc(m_hwnd, message, wParam, lParam);
 		break;
@@ -90,12 +130,55 @@ LRESULT D3DApp::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
+void D3DApp::Set4xMsaaState(bool value)
+{
+	if (m_4xMsaaState != value)
+	{
+		m_4xMsaaState = value;
+		CreateSwapChain();
+		OnResize();
+	}
+}
 
 void D3DApp::InitDX12()
 {
 	LoadPipeline();
-	LoadAssets();
 	OnResize();
+}
+
+int D3DApp::Run()
+{
+	MSG msg = { 0 };
+
+	m_timer.Reset();
+
+	while (msg.message != WM_QUIT)
+	{
+		// If there are Window messages then process them.
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		// Otherwise, do animation/game stuff.
+		else
+		{
+			m_timer.Tick();
+
+			if (!m_appPaused)
+			{
+				CalculateFrameStats();
+				Update(m_timer);
+				Render(m_timer);
+			}
+			else
+			{
+				Sleep(100);
+			}
+		}
+	}
+
+	return (int)msg.wParam;
 }
 
 void D3DApp::LoadPipeline()
@@ -114,12 +197,12 @@ void D3DApp::LoadPipeline()
 
 	// 2. Create device
 
-	Microsoft::WRL::ComPtr<IDXGIFactory4> factory;
-	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
+	//Microsoft::WRL::ComPtr<IDXGIFactory4> factory;
+	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_factory)));
 	Microsoft::WRL::ComPtr<IDXGIAdapter1> hardwareAdapter;
 	// Get first adapter that supports DX12
 	// if adapter is nullptr use default adapter
-	GetHardwareAdapter(factory.Get(), &hardwareAdapter, true);
+	GetHardwareAdapter(m_factory.Get(), &hardwareAdapter, true);
 
 	HRESULT hardwareResult = D3D12CreateDevice(
 		hardwareAdapter.Get(),
@@ -128,7 +211,7 @@ void D3DApp::LoadPipeline()
 	if (FAILED(hardwareResult))
 	{
 		Microsoft::WRL::ComPtr<IDXGIAdapter> warpAdapter;
-		ThrowIfFailed(factory->EnumWarpAdapter(IID_PPV_ARGS(&warpAdapter)));
+		ThrowIfFailed(m_factory->EnumWarpAdapter(IID_PPV_ARGS(&warpAdapter)));
 
 		ThrowIfFailed(D3D12CreateDevice(
 			warpAdapter.Get(), 
@@ -181,7 +264,7 @@ void D3DApp::LoadPipeline()
 
 
 	// 4. Create swap chain
-	CreateSwapChain(factory);
+	CreateSwapChain();
 	
 
 	// 5. Create RTV and DSV descriptor heap
@@ -190,7 +273,7 @@ void D3DApp::LoadPipeline()
 	
 }
 
-void D3DApp::CreateSwapChain(Microsoft::WRL::ComPtr<IDXGIFactory4> factory)
+void D3DApp::CreateSwapChain()
 {
 	m_swapChain.Reset();
 
@@ -212,7 +295,7 @@ void D3DApp::CreateSwapChain(Microsoft::WRL::ComPtr<IDXGIFactory4> factory)
 	swapChainDesc.Windowed = TRUE;
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapChain;
-	ThrowIfFailed(factory->CreateSwapChain(
+	ThrowIfFailed(m_factory->CreateSwapChain(
 		m_commandQueue.Get(),
 		&swapChainDesc,
 		&swapChain
@@ -221,7 +304,7 @@ void D3DApp::CreateSwapChain(Microsoft::WRL::ComPtr<IDXGIFactory4> factory)
 	ThrowIfFailed(swapChain.As(&m_swapChain));
 
 	// Fullscreen transitions not supported
-	ThrowIfFailed(factory->MakeWindowAssociation(m_hwnd, DXGI_MWA_NO_ALT_ENTER));
+	ThrowIfFailed(m_factory->MakeWindowAssociation(m_hwnd, DXGI_MWA_NO_ALT_ENTER));
 
 	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 }
@@ -369,7 +452,7 @@ void D3DApp::FlushCommandQueue()
 	}
 }
 
-void D3DApp::LoadAssets()
+/*void D3DApp::LoadAssets()
 {
 	// 1. Create empty root signature
 	{
@@ -506,11 +589,11 @@ void D3DApp::LoadAssets()
 		// 11. Wait for GPU to finish (fence)
 		WaitForPreviousFrame();
 	}
-}
+}*/
 
-void D3DApp::Update() {}
+void D3DApp::Update(const GameTimer& gt) {}
 
-void D3DApp::Render() 
+void D3DApp::Render(const GameTimer& gt) 
 {
 	// Record all commands needed to render the scene into the command list
 	PopulateCommandList();
@@ -629,6 +712,7 @@ void D3DApp::CalculateFrameStats()
 		timeElapsed += 1.0f;
 	}
 }
+
 
 void GetHardwareAdapter(
 	IDXGIFactory1* pFactory,

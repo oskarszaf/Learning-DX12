@@ -20,6 +20,8 @@
 #include "d3dUtil.h"
 #include "GameTimer.h"
 
+//TODO: MERGE BASEWINDOW AND D3DAPP INTO ONE ABSTRACT CLASS FOR SIMPLICITY
+
 template <class DERIVED_TYPE>
 class BaseWindow
 {
@@ -118,11 +120,7 @@ public:
 		
 };
 
-struct Vertex
-{
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT4 color;
-};
+
 
 class D3DApp : public BaseWindow<D3DApp>
 {
@@ -141,12 +139,16 @@ public:
 		m_DsvDescriptorSize(0),
 		m_CbvSrvDescriptorSize(0) {}
 
-	void InitDX12();
-	void Update();
-	void Render();
-	void Destroy();
+	float     AspectRatio()const 
+	{
+		return static_cast<float>(m_width) / m_height;
+	}
+	virtual ~D3DApp();
 
-	void CalculateFrameStats();
+
+	
+	virtual void InitDX12();
+	int Run();
 
 	GameTimer* getTimer()
 	{
@@ -160,19 +162,49 @@ public:
 	
 
 protected:
+	virtual void Update(const GameTimer& gt)=0;
+	virtual void Render(const GameTimer& gt)=0;
+	virtual void Destroy()=0;
+	virtual void OnResize();
+
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) {};
+	virtual void OnMouseUp(WPARAM btnState, int x, int y) {};
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) {};
+
+	virtual void CreateRtvAndDsvDescriptorHeaps();
+
+	void CalculateFrameStats();
+	void LoadPipeline();
+	void LoadAssets();
+	void PopulateCommandList();
+	void WaitForPreviousFrame();
+	void CreateSwapChain();
+	
+	void FlushCommandQueue();
+	void Set4xMsaaState(bool value);
+
+	ID3D12Resource* CurrentBackBuffer()const
+	{
+		return m_renderTargets[m_frameIndex].Get();
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView()const
+	{
+		return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			m_rtvHeap->GetCPUDescriptorHandleForHeapStart(),
+			m_frameIndex,
+			m_rtvDescriptorSize);
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView()const
+	{
+		return m_dsvHeap->GetCPUDescriptorHandleForHeapStart();
+	}
+	
+
+protected:
 
 	static const UINT FrameCount = 2;
-	
-	
-	//boolean m_useWarpDevice;
-	int m_width;
-	int m_height;
-	std::wstring m_windowCaption = L"Triangle: ";
-	float m_aspectRatio;
-	bool m_minimized = false;
-	bool m_maximized = false;
-	bool m_resizing = false;
-	bool m_appPaused = false;
 
 	// Pipeline objects
 	D3D12_VIEWPORT m_viewport;
@@ -188,6 +220,19 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipelineState;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_depthStencilBuffer;
+	Microsoft::WRL::ComPtr<IDXGIFactory4> m_factory;
+	
+	
+	
+	//boolean m_useWarpDevice;
+	int m_width;
+	int m_height;
+	std::wstring m_windowCaption = L"Triangle: ";
+	float m_aspectRatio;
+	bool m_minimized = false;
+	bool m_maximized = false;
+	bool m_resizing = false;
+	bool m_appPaused = false;
 	UINT m_rtvDescriptorSize;
 	UINT m_DsvDescriptorSize;
 	UINT m_CbvSrvDescriptorSize;
@@ -206,15 +251,5 @@ protected:
 	UINT64 m_fenceValue;
 
 	GameTimer m_timer;
-
-	void LoadPipeline();
-	void LoadAssets();
-	void PopulateCommandList();
-	void WaitForPreviousFrame();
-	void CreateSwapChain(Microsoft::WRL::ComPtr<IDXGIFactory4> factory);
-	void CreateRtvAndDsvDescriptorHeaps();
-	void OnResize();
-	void FlushCommandQueue();
-
 	
 };

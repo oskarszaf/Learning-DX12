@@ -172,6 +172,7 @@ struct Object
 			std::cout << linecount << std::endl;
 			f.close();
 			std::cout << vertices.size() << std::endl;
+
 			return;
 		}
 		else
@@ -186,8 +187,8 @@ struct Object
 
 struct DXVertex
 {
-	DirectX::XMFLOAT4 pos;
-	DirectX::XMFLOAT3 normal{ 0,0,0 };
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT4 normal{ 0,0,0,0 };
 };
 
 struct DXObject
@@ -196,7 +197,7 @@ struct DXObject
 	std::vector<unsigned int> indexBuffer;
 	std::vector<std::vector<unsigned int>> faces;
 
-	DXObject(Object& object)
+	/*DXObject(Object& object)
 	{
 		std::vector<DXVertex> vertvec;
 		for (DirectX::XMFLOAT4 position: object.vertices)
@@ -208,10 +209,10 @@ struct DXObject
 		calculateNormals(object, vertvec);
 		vertexBuffer = vertvec;
 		std::cout << vertexBuffer[38000].normal.x << " " << vertexBuffer[38000].normal.y <<" "<< vertexBuffer[38000].normal.z << std::endl;
-	}
+	}*/
 
 	DXObject() {}
-
+	/*
 	void calculateNormals(Object& object, std::vector<DXVertex>& vertvec)
 	{
 		std::vector<unsigned int> indices;
@@ -237,14 +238,14 @@ struct DXObject
 
 			DirectX::XMVECTOR n = DirectX::XMVector3Cross(e1, e2);
 
-			DirectX::XMVECTOR n0 = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&vertvec.at(i0).normal), n);
-			XMStoreFloat3(&vertvec.at(i0).normal, n0);
+			DirectX::XMVECTOR n0 = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertvec.at(i0).normal), n);
+			XMStoreFloat4(&vertvec.at(i0).normal, n0);
 
-			DirectX::XMVECTOR n1 = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&vertvec.at(i1).normal), n);
-			XMStoreFloat3(&vertvec.at(i1).normal, n1);
+			DirectX::XMVECTOR n1 = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertvec.at(i1).normal), n);
+			XMStoreFloat4(&vertvec.at(i1).normal, n1);
 
-			DirectX::XMVECTOR n2 = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&vertvec.at(i2).normal), n);
-			XMStoreFloat3(&vertvec.at(i1).normal, n2);
+			DirectX::XMVECTOR n2 = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertvec.at(i2).normal), n);
+			XMStoreFloat4(&vertvec.at(i1).normal, n2);
 		}
 		for (DXVertex v : vertvec)
 		{
@@ -261,9 +262,9 @@ struct DXObject
 
 		for (std::vector<unsigned int> face : faces)
 		{
-			DirectX::XMVECTOR a = DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(0)).pos);
-			DirectX::XMVECTOR b = DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(1)).pos);
-			DirectX::XMVECTOR c = DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(2)).pos);
+			DirectX::XMVECTOR a = DirectX::XMLoadFloat3(&vertexBuffer.at(face.at(0)).pos);
+			DirectX::XMVECTOR b = DirectX::XMLoadFloat3(&vertexBuffer.at(face.at(1)).pos);
+			DirectX::XMVECTOR c = DirectX::XMLoadFloat3(&vertexBuffer.at(face.at(2)).pos);
 
 			DirectX::XMVECTOR e1 = DirectX::XMVectorSubtract(b, a);
 			DirectX::XMVECTOR e2 = DirectX::XMVectorSubtract(c, a);
@@ -271,23 +272,23 @@ struct DXObject
 			DirectX::XMVECTOR n = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(e1, e2));
 			printVEC4(n);
 
-			DirectX::XMVECTOR na = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&vertexBuffer.at(face.at(0)).normal), n);
-			DirectX::XMStoreFloat3(&vertexBuffer.at(face.at(0)).normal, na);
+			DirectX::XMVECTOR na = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(0)).normal), n);
+			DirectX::XMStoreFloat4(&vertexBuffer.at(face.at(0)).normal, na);
 
-			DirectX::XMVECTOR nb = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&vertexBuffer.at(face.at(1)).normal), n);
-			DirectX::XMStoreFloat3(&vertexBuffer.at(face.at(1)).normal, nb);
+			DirectX::XMVECTOR nb = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(1)).normal), n);
+			DirectX::XMStoreFloat4(&vertexBuffer.at(face.at(1)).normal, nb);
 
-			DirectX::XMVECTOR nc = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&vertexBuffer.at(face.at(2)).normal), n);
-			DirectX::XMStoreFloat3(&vertexBuffer.at(face.at(2)).normal, nc);
+			DirectX::XMVECTOR nc = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(2)).normal), n);
+			DirectX::XMStoreFloat4(&vertexBuffer.at(face.at(2)).normal, nc);
 
 		}
 
 		for (DXVertex v : vertexBuffer)
 		{
-			DirectX::XMVECTOR vv = DirectX::XMLoadFloat3(&v.normal);
+			DirectX::XMVECTOR vv = DirectX::XMLoadFloat4(&v.normal);
 			vv = DirectX::XMVector3Normalize(vv);
 			printVEC4(vv);
-			DirectX::XMStoreFloat3(&v.normal, vv);
+			DirectX::XMStoreFloat4(&v.normal, vv);
 		}
 		
 	}
@@ -317,7 +318,7 @@ struct DXObject
 	void printVEC4(DirectX::FXMVECTOR v)
 	{
 		std::cout << DirectX::XMVectorGetX(v) << " " << DirectX::XMVectorGetY(v) << " " << DirectX::XMVectorGetZ(v) << " " << DirectX::XMVectorGetW(v) << std::endl;
-	}
+	}*/
 };
 
 

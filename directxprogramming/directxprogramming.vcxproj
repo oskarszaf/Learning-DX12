@@ -20,23 +20,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Users\oskar\Downloads\d3dx12.h" />
+    <ClInclude Include="Common\cube.h" />
     <ClInclude Include="Common\d3dApp.h" />
     <ClInclude Include="Common\d3dUtil.h" />
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="Common\DDSTextureLoader12.h" />
     <ClInclude Include="Common\GameTimer.h" />
     <ClInclude Include="Common\MathHelper.h" />
-    <ClInclude Include="Common\triangle.h" />
+    <ClInclude Include="Common\UploadBuffer.h" />
     <ClInclude Include="ObjectUtils\objutils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\AppMain.cpp" />
+    <ClCompile Include="Common\cube.cpp" />
     <ClCompile Include="Common\d3dApp.cpp" />
     <ClCompile Include="Common\d3dUtil.cpp" />
     <ClCompile Include="Common\DDSTextureLoader12.cpp" />
     <ClCompile Include="Common\GameTimer.cpp" />
     <ClCompile Include="Common\MathHelper.cpp" />
-    <ClCompile Include="Common\triangle.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
