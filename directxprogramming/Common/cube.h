@@ -1,17 +1,11 @@
 #pragma once
 #include "d3dApp.h"
 #include "UploadBuffer.h"
-//#include "../ObjectUtils/objutils.h"
+#include "../ObjectUtils/objutils.h"
 
 struct ObjectConstants
 {
 	DirectX::XMFLOAT4X4 matMVP = MathHelper::Identity4x4();
-};
-
-struct DXVertex
-{
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT4 color;
 };
 
 class CubeApp : public D3DApp

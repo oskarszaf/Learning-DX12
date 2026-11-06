@@ -237,6 +237,8 @@ protected:
 	UINT m_DsvDescriptorSize;
 	UINT m_CbvSrvDescriptorSize;
 
+	bool m_controlCentered = true;
+
 	bool      m_4xMsaaState = false;    // 4X MSAA enabled
 	UINT      m_4xMsaaQuality = 0;      // quality level of 4X MSAA
 

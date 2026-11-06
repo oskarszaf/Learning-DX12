@@ -83,7 +83,7 @@ void CubeApp::Render(const GameTimer& gt)
 	m_commandList->ResourceBarrier(1, &transition);
 
 	// Clear the back and depth buffers
-	m_commandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::LightSteelBlue, 0, nullptr);
+	m_commandList->ClearRenderTargetView(CurrentBackBufferView(), DirectX::Colors::Black, 0, nullptr);
 	m_commandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	// Specify buffers to render to
@@ -265,54 +265,30 @@ void CubeApp::BuildShadersAndInputLayout()
 // GEOMETRY BUILT HERE
 void CubeApp::BuildGeometry()
 {
-	std::array<DXVertex, 8> vertexBuffer = {
-		DXVertex{DirectX::XMFLOAT3{-1.0f,-1.0f,-1.0f},DirectX::XMFLOAT4{-0.408248f, - 0.408248f, - 0.816497f, 1.0f}},
-		DXVertex{DirectX::XMFLOAT3{-1.0f,1.0f, -1.0f},DirectX::XMFLOAT4{-0.666667f, 0.666667f, -0.333333f, 1.0f}},
-		DXVertex{DirectX::XMFLOAT3{1.0f, 1.0f,-1.0f},DirectX::XMFLOAT4{0.408248f, 0.408248f, -0.816497f, 1.0f}},
-		DXVertex{DirectX::XMFLOAT3{1.0f, -1.0f, -1.0f},DirectX::XMFLOAT4{0.666667f, -0.666667f, -0.333333f, 1.0f}},
-		DXVertex{DirectX::XMFLOAT3{ -1.0f,-1.0f,1.0f},DirectX::XMFLOAT4{-0.57735f, -0.57735f, 0.57735f, 1.0f}},
-		DXVertex{DirectX::XMFLOAT3{ -1.0f,1.0f, 1.0f},DirectX::XMFLOAT4{-0.57735f, 0.57735f, 0.57735f, 1.0f}},
-		DXVertex{DirectX::XMFLOAT3{ 1.0f, 1.0f,1.0f},DirectX::XMFLOAT4{0.57735f, 0.57735f, 0.57735f, 1.0f}},
-		DXVertex{DirectX::XMFLOAT3{ 1.0f, -1.0f, 1.0f},DirectX::XMFLOAT4{0.57735f, -0.57735f, 0.57735f, 1.0f}}
-	};
-		
-	std::array<std::uint16_t, 36> indexBuffer = {
-		0, 1, 2,
-		0, 2, 3,
 
-		4, 6, 5,
-		4, 7, 6,
+	Object cube;
+	cube.getObjectFromObj("Objects\\stanford-bunny.obj");
+	cube.calculateNormalsFromIndexBufferTreatAsColors();	
+	DirectX::XMStoreFloat4x4(&m_world, DirectX::XMMatrixAffineTransformation(DirectX::XMVECTOR{ 10.0f, 10.0f, 10.0f }, DirectX::XMVECTOR{ 0,0,0 }, DirectX::XMVECTOR{ 0,0,0 }, DirectX::XMVECTOR{ 0,-1,0 }));
 
-		4, 5, 1,
-		4, 1, 0,
 
-		3, 2, 6,
-		3, 6, 7,
-		// top face
-		1, 5, 6,
-		1, 6, 2,
-		// bottom face
-		4, 0, 3,
-		4, 3, 7
-	};
-
-	const UINT vbByteSize = (UINT)vertexBuffer.size() * sizeof(DXVertex);
-	const UINT ibByteSize = (UINT)indexBuffer.size() * sizeof(std::uint16_t);
+	const UINT vbByteSize = (UINT)cube.vertexBuffer.size() * sizeof(DXVertex);
+	const UINT ibByteSize = (UINT)cube.indexBuffer.size() * sizeof(std::uint16_t);
 
 	m_geometry = std::make_unique<MeshGeometry>();
 	m_geometry->Name = "boxGeo";
 
 	ThrowIfFailed(D3DCreateBlob(vbByteSize, &m_geometry->VertexBufferCPU));
-	CopyMemory(m_geometry->VertexBufferCPU->GetBufferPointer(), vertexBuffer.data(), vbByteSize);
+	CopyMemory(m_geometry->VertexBufferCPU->GetBufferPointer(), cube.vertexBuffer.data(), vbByteSize);
 
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &m_geometry->IndexBufferCPU));
-	CopyMemory(m_geometry->IndexBufferCPU->GetBufferPointer(), indexBuffer.data(), ibByteSize);
+	CopyMemory(m_geometry->IndexBufferCPU->GetBufferPointer(), cube.indexBuffer.data(), ibByteSize);
 
 	m_geometry->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device.Get(),
-		m_commandList.Get(), vertexBuffer.data(), vbByteSize, m_geometry->VertexBufferUploader);
+		m_commandList.Get(), cube.vertexBuffer.data(), vbByteSize, m_geometry->VertexBufferUploader);
 
 	m_geometry->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(m_device.Get(),
-		m_commandList.Get(), indexBuffer.data(), ibByteSize, m_geometry->IndexBufferUploader);
+		m_commandList.Get(), cube.indexBuffer.data(), ibByteSize, m_geometry->IndexBufferUploader);
 
 	m_geometry->VertexByteStride = sizeof(DXVertex);
 	m_geometry->VertexBufferByteSize = vbByteSize;
@@ -320,7 +296,7 @@ void CubeApp::BuildGeometry()
 	m_geometry->IndexBufferByteSize = ibByteSize;
 
 	SubmeshGeometry submesh;
-	submesh.IndexCount = (UINT)indexBuffer.size();
+	submesh.IndexCount = (UINT)cube.indexBuffer.size();
 	submesh.StartIndexLocation = 0;
 	submesh.BaseVertexLocation = 0;
 
