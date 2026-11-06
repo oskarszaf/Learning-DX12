@@ -41,14 +41,34 @@ void CubeApp::OnResize()
 
 void CubeApp::Update(const GameTimer& gt)
 {
-	// spherical -> cartesian coordinates
-	float x = m_radius * sinf(m_phi) * cosf(m_theta);
-	float y = m_radius * cosf(m_phi);
-	float z = m_radius * sinf(m_phi) * sinf(m_theta);
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = 0.0f;
+	DirectX::XMVECTOR target = DirectX::XMVectorZero();
+	if (m_controlCentered)
+	{
+		// spherical -> cartesian coordinates
+		x = m_radius * sinf(m_phi) * cosf(m_theta);
+		y = m_radius * cosf(m_phi);
+		z = m_radius * sinf(m_phi) * sinf(m_theta);
+		//target = DirectX::XMVectorZero();
+	}
+	else
+	{
+		m_translation.x += (m_wpressed ? -0.02f : 0.0f) + (m_spressed ? 0.02f : 0.0f);
+		m_translation.z += (m_apressed ? -0.02f : 0.0f) + (m_dpressed ? 0.02f : 0.0f);
+
+		x = 1.0f + m_translation.x;
+		y = m_translation.y;
+		z = m_translation.z;
+		target = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&m_translation), DirectX::XMVECTOR{ -1.0f,0.0f,0.0f });
+		//DirectX::XMVectorSetW(target, 0.0f);
+	}
+	
 	
 	// build the view matrix
 	DirectX::XMVECTOR pos = DirectX::XMVectorSet(x, y, z, 1.0f);
-	DirectX::XMVECTOR target = DirectX::XMVectorZero();
+	
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
@@ -142,6 +162,7 @@ void CubeApp::OnMouseUp(WPARAM btnState, int x, int y)
 
 void CubeApp::OnMouseMove(WPARAM btnState, int x, int y)
 {
+
 	if ((btnState & MK_LBUTTON) != 0)
 	{
 		// each pixel 0.25 degrees
@@ -155,7 +176,7 @@ void CubeApp::OnMouseMove(WPARAM btnState, int x, int y)
 		// restrict m_phi
 		m_phi = MathHelper::Clamp(m_phi, 0.1f, DirectX::XM_PI - 0.1f);
 	}
-	else if ((btnState & MK_RBUTTON) != 0)
+	else if ((btnState & MK_RBUTTON) != 0 && m_controlCentered)
 	{
 		// each pixel 0.005 units
 		float dx = 0.005f * static_cast<float>(x - m_lastMousePos.x);
@@ -165,11 +186,75 @@ void CubeApp::OnMouseMove(WPARAM btnState, int x, int y)
 		m_radius += dx - dy;
 
 		// restric the radius
-		m_radius = MathHelper::Clamp(m_radius, 3.0f, 15.0f);
+		m_radius = MathHelper::Clamp(m_radius, 1.0f, 15.0f);
 	}
 
 	m_lastMousePos.x = x;
 	m_lastMousePos.y = y;
+}
+
+void CubeApp::OnMouseWheelScroll(WPARAM btnState, int x, int y)
+{
+	if (m_controlCentered)
+	{
+		// update radius
+		m_radius += 0.001 * GET_WHEEL_DELTA_WPARAM(btnState);
+
+		// restric the radius
+		m_radius = MathHelper::Clamp(m_radius, 1.0f, 15.0f);
+	}
+	else
+	{
+		// update radius
+		m_translation.x += 0.001 * GET_WHEEL_DELTA_WPARAM(btnState);
+
+		// restric the radius
+		m_translation.x = MathHelper::Clamp(m_translation.x, 1.0f, 15.0f);
+	}
+	
+}
+
+void CubeApp::OnKeyDown(WPARAM btnState)
+{
+	if (m_controlCentered) { return; }
+
+
+	if (btnState == 'W')
+	{
+		m_wpressed = true;
+	}
+	else if (btnState == 'S')
+	{
+		m_spressed = true;
+	}
+	else if (btnState == 'A')
+	{
+		m_apressed = true;
+	}
+	else if (btnState == 'D')
+	{
+		m_dpressed = true;
+	}
+}
+
+void CubeApp::OnKeyUp(WPARAM btnState)
+{
+	if (btnState == 'W')
+	{
+		m_wpressed = false;
+	}
+	else if (btnState == 'S')
+	{
+		m_spressed = false;
+	}
+	else if (btnState == 'A')
+	{
+		m_apressed = false;
+	}
+	else if (btnState == 'D')
+	{
+		m_dpressed = false;
+	}
 }
 
 void CubeApp::BuildDescriptorHeaps()

@@ -13,20 +13,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	UINT height = 600;
 	float aspectRatio =(float) width / height;
 
-	//Object stanfordBunny; 
-	//stanfordBunny.getObjectFromObj("Objects\\stanford-bunny.obj");
-	//DXObject DXstanfordBunny{ stanfordBunny };
-
-	//DXObject cube;
-
-	//cube.vertexBuffer = vertexBuffer;
-	//cube.indexBuffer = indexBuffer;
-	//cube.calcNormalsFromIndexBuffer(3);
-
-
 	try
 	{
 		CubeApp win(width, height, aspectRatio);
+		//win.swapControlMode();
 
 		if (!win.Create(
 			L"Yeah", WS_OVERLAPPEDWINDOW, 0, CW_USEDEFAULT, CW_USEDEFAULT, width, height))

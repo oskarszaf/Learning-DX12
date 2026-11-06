@@ -17,6 +17,11 @@ public:
 	virtual void InitDX12()override;
 	virtual void Destroy()override;
 
+	void swapControlMode()
+	{
+		m_controlCentered = !m_controlCentered;
+	}
+
 private:
 	
 	virtual void OnResize()override;
@@ -26,6 +31,9 @@ private:
 	virtual void OnMouseDown(WPARAM btnState, int x, int y)override;
 	virtual void OnMouseUp(WPARAM btnState, int x, int y)override;
 	virtual void OnMouseMove(WPARAM btnState, int x, int y)override;
+	virtual void OnMouseWheelScroll(WPARAM btnState, int x, int y)override;
+	virtual void OnKeyDown(WPARAM btnState)override;
+	virtual void OnKeyUp(WPARAM btnState)override;
 
 	void BuildDescriptorHeaps();
 	void BuildConstantBuffers();
@@ -53,6 +61,12 @@ private:
 	DirectX::XMFLOAT4X4 m_world = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 m_view = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 m_proj = MathHelper::Identity4x4();
+
+	DirectX::XMFLOAT3 m_translation = DirectX::XMFLOAT3{ 0,0,0 };
+	bool m_wpressed = false;
+	bool m_spressed = false;
+	bool m_apressed = false;
+	bool m_dpressed = false;
 
 	float m_theta = 1.5f * DirectX::XM_PI;
 	float m_phi = DirectX::XM_PIDIV4;

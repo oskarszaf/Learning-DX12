@@ -170,6 +170,9 @@ protected:
 	virtual void OnMouseDown(WPARAM btnState, int x, int y) {};
 	virtual void OnMouseUp(WPARAM btnState, int x, int y) {};
 	virtual void OnMouseMove(WPARAM btnState, int x, int y) {};
+	virtual void OnMouseWheelScroll(WPARAM btnState, int x, int y){};
+	virtual void OnKeyDown(WPARAM btnState) {};
+	virtual void OnKeyUp(WPARAM btnState) {};
 
 	virtual void CreateRtvAndDsvDescriptorHeaps();
 
