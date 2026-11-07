@@ -20,9 +20,7 @@
 #include "d3dUtil.h"
 #include "GameTimer.h"
 
-//TODO: MERGE BASEWINDOW AND D3DAPP INTO ONE ABSTRACT CLASS FOR SIMPLICITY
-
-template <class DERIVED_TYPE>
+/*template <class DERIVED_TYPE>
 class BaseWindow
 {
 public:
@@ -119,10 +117,10 @@ public:
 		HWND m_hwnd;
 		
 };
+*/
 
 
-
-class D3DApp : public BaseWindow<D3DApp>
+class D3DApp //: public BaseWindow<D3DApp>
 {
 public:
 	PCWSTR ClassName() const { return L"D3DApp"; }
@@ -160,6 +158,88 @@ public:
 		return m_appPaused;
 	}
 	
+	HWND Window() const { return m_hwnd; }
+
+	BOOL Create(
+		PCWSTR lpWindowName,
+		DWORD dwStyle,
+		DWORD dwExStyle = 0,
+		int x = CW_USEDEFAULT,
+		int y = CW_USEDEFAULT,
+		int nWidth = CW_USEDEFAULT,
+		int nHeight = CW_USEDEFAULT,
+		HWND hWndParent = 0,
+		HMENU hMenu = 0
+	)
+	{
+		// Fill out window class
+
+
+		WNDCLASSEX wc = { 0 };
+		wc.cbSize = sizeof(WNDCLASSEX);
+		wc.style = CS_HREDRAW | CS_VREDRAW;
+		wc.lpfnWndProc = WndProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = GetModuleHandle(NULL);
+		wc.hIcon = LoadIcon(wc.hInstance, IDI_APPLICATION);
+		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+		wc.lpszMenuName = NULL;
+		wc.lpszClassName = ClassName();
+		wc.hIconSm = LoadIcon(wc.hInstance, IDI_APPLICATION);
+
+		// Register window class
+		if (!RegisterClassEx(&wc))
+		{
+			MessageBox(NULL, L"Registering class Failed!!!!", L"What", 0);
+			return 1;
+		}
+
+		// Create window
+		HWND hWnd = CreateWindowEx(
+			dwExStyle,
+			ClassName(),
+			lpWindowName,
+			dwStyle,
+			x, y,
+			nWidth, nHeight,
+			hWndParent,
+			hMenu,
+			GetModuleHandle(NULL),
+			this
+		);
+
+		return m_hwnd ? TRUE : FALSE;
+	}
+
+	static LRESULT CALLBACK WndProc(HWND   hwnd, UINT   message, WPARAM wParam, LPARAM lParam)
+	{
+		D3DApp* pThis = NULL;
+
+		if (message == WM_NCCREATE)
+		{
+			CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+			pThis = (D3DApp*)(pCreate->lpCreateParams);
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)pThis);
+
+			pThis->m_hwnd = hwnd;
+		}
+		else
+		{
+			pThis = (D3DApp*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+		}
+
+		if (pThis)
+		{
+			return pThis->HandleMessage(message, wParam, lParam);
+		}
+		else
+		{
+			return DefWindowProc(hwnd, message, wParam, lParam);
+		}
+		return 0;
+	}
 
 protected:
 	virtual void Update(const GameTimer& gt)=0;
@@ -204,9 +284,8 @@ protected:
 		return m_dsvHeap->GetCPUDescriptorHandleForHeapStart();
 	}
 	
-
 protected:
-
+	HWND m_hwnd;
 	static const UINT FrameCount = 2;
 
 	// Pipeline objects
@@ -256,5 +335,8 @@ protected:
 	UINT64 m_fenceValue;
 
 	GameTimer m_timer;
+
+	
+	
 	
 };
