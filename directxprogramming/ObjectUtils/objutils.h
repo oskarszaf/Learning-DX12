@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "../Common/FrameResource.h"
 
 // TODO: OBJECTS AND POLYGON GROUPS
 // TODO: MTL SUPPORT
@@ -15,11 +16,7 @@ struct FaceElement
 	std::uint16_t normal = 0;
 };
 
-struct DXVertex
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT4 color{ 0,0,0,1 };
-};
+
 
 
 struct Object
@@ -31,7 +28,7 @@ public:
 	std::vector<std::vector<unsigned int>> lineElements = {};
 	
 
-	std::vector<DXVertex> vertexBuffer = {};
+	std::vector<Vertex> vertexBuffer = {};
 	std::vector<std::uint16_t> indexBuffer = {};
 	std::vector<std::vector<std::uint16_t>> dxfaces = {};
 
@@ -196,7 +193,7 @@ public:
 
 		for (int i = 0; i < vertices.size(); i++)
 		{
-			DXVertex vertex;
+			Vertex vertex;
 			vertex.pos = vertices.at(i);
 			vertexBuffer.at(i) = vertex;
 		}
@@ -242,23 +239,12 @@ public:
 
 		}
 
-		for (DXVertex v : vertexBuffer)
+		for (Vertex v : vertexBuffer)
 		{
 			DirectX::XMVECTOR vv = DirectX::XMLoadFloat4(&v.color);
 			vv = DirectX::XMVector3Normalize(vv);
 			//printVEC4(vv);
 			DirectX::XMStoreFloat4(&v.color, vv);
-		}
-	}
-
-	void scaleMesh(float factor)
-	{
-		for (DXVertex vertex : vertexBuffer)
-		{
-			//DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&vertex.pos);
-			//pos = DirectX::XMVector3Transform(pos, DirectX::XMMatrixScaling(factor, factor, factor));
-			//DirectX::XMStoreFloat3(&vertex.pos, pos);
-			vertex.pos = DirectX::XMFLOAT3{factor * vertex.pos.x, factor * vertex.pos.y , factor * vertex.pos.z };
 		}
 	}
 
@@ -309,19 +295,4 @@ public:
 		}
 };
 
-
-
-
-/*struct Material
-{
-	std::string name = "";
-	float specEx = 1.0;
-	float alpha = 1.0;
-	float refindex = 1.0;
-	DirectX::XMFLOAT3 ambient = { 0,0,0 };
-	DirectX::XMFLOAT3 diffuse = { 0,0,0 };
-	DirectX::XMFLOAT3 specular = { 0,0,0 };
-	DirectX::XMFLOAT3 transmissionFilter = { 1.0,1.0,1.0 };
-	
-};*/
 

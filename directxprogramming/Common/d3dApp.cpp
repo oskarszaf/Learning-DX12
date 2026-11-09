@@ -154,6 +154,8 @@ void D3DApp::InitDX12()
 {
 	LoadPipeline();
 	OnResize();
+	m_timer.Reset();
+	m_timer.Start();
 }
 
 int D3DApp::Run()

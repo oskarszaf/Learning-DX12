@@ -2,10 +2,33 @@
 #include "d3dApp.h"
 #include "UploadBuffer.h"
 #include "../ObjectUtils/objutils.h"
+#include "Camera.h"
+#include "FrameResource.h"
 
-struct ObjectConstants
+
+
+struct RenderItem
 {
-	DirectX::XMFLOAT4X4 matMVP = MathHelper::Identity4x4();
+	RenderItem() = default;
+
+	DirectX::XMFLOAT4X4 Model = MathHelper::Identity4x4();
+
+	int NumFramesDirty = gNumFrameResources;
+
+	// Index into GPU constant buffer corresponding to the ObjectCB for this render item.
+	UINT ObjCBIndex = -1;
+
+	MeshGeometry* Geo = nullptr;
+
+	// Primitive topology
+	D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	//DrawIndexedInstanced parameters
+	UINT IndexCount = 0;
+	UINT StartIndexLocation = 0;
+	int BaseVertexLocation = 0;
+private:
+	const int gNumFrameResources = 3;
 };
 
 class CubeApp : public D3DApp
@@ -35,28 +58,60 @@ private:
 	virtual void OnKeyDown(WPARAM btnState)override;
 	virtual void OnKeyUp(WPARAM btnState)override;
 
+	void UpdateCamera(const GameTimer& gt);
+	void UpdateObjectCBs(const GameTimer& gt);
+	void UpdateMainPassCB(const GameTimer& gt);
+
 	void BuildDescriptorHeaps();
-	void BuildConstantBuffers();
+	void BuildConstantBufferViews();
 	void BuildRootSignature();
 	void BuildShadersAndInputLayout();
+
 	void BuildGeometry();
-	void BuildPSO();
+	void BuildPSOs();
+
+	void BuildFrameResources();
+	void BuildRenderItems();
+	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
 private:
+
+	Camera camera;
+
+	std::vector<std::unique_ptr<FrameResource>> m_frameResources;
+	FrameResource* m_currFrameResource = nullptr;
+	int m_currFrameResourceIndex = 0;
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rootSignature = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_cbvHeap = nullptr;
 
-	std::unique_ptr<UploadBuffer<ObjectConstants>> m_objectCB = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_srvHeap = nullptr;
 
-	std::unique_ptr<MeshGeometry> m_geometry = nullptr;
+	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3DBlob>> m_shaders;
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D12PipelineState>> m_PSOs;
 
-	Microsoft::WRL::ComPtr<ID3DBlob> m_vsByteCode = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> m_psByteCode = nullptr;
+	//std::unique_ptr<UploadBuffer<ObjectConstants>> m_objectCB = nullptr;
+
+	//std::unique_ptr<MeshGeometry> m_geometry = nullptr;
+
+	//Microsoft::WRL::ComPtr<ID3DBlob> m_vsByteCode = nullptr;
+	//Microsoft::WRL::ComPtr<ID3DBlob> m_psByteCode = nullptr;
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputLayout;
 
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> m_PSO = nullptr;
+	// List of all RenderItems
+	std::vector<std::unique_ptr<RenderItem>> m_renderItems;
+	
+	// redner items divided by PSO
+	std::vector<RenderItem*> m_opaqueRItems;
+
+	PassConstants m_mainPassCB;
+	UINT m_passCbvOffset = 0;
+	
+	bool m_isWireframe = false;
+
+	//Microsoft::WRL::ComPtr<ID3D12PipelineState> m_PSO = nullptr;
 
 	DirectX::XMFLOAT4X4 m_world = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 m_view = MathHelper::Identity4x4();
@@ -68,9 +123,14 @@ private:
 	bool m_apressed = false;
 	bool m_dpressed = false;
 
+	DirectX::XMFLOAT3 m_eyePos{ 0,0,0 };
 	float m_theta = 1.5f * DirectX::XM_PI;
 	float m_phi = DirectX::XM_PIDIV4;
 	float m_radius = 5.0f;
 
 	POINT m_lastMousePos;
+	const int gNumFrameResources = 3;
 };
+
+
+
