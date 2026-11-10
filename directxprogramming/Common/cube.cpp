@@ -192,24 +192,8 @@ void CubeApp::OnMouseMove(WPARAM btnState, int x, int y)
 }
 
 void CubeApp::OnMouseWheelScroll(WPARAM btnState, int x, int y)
-{
-	if (m_controlCentered)
-	{
-		// update radius
-		m_radius += 0.001 * GET_WHEEL_DELTA_WPARAM(btnState);
-
-		// restric the radius
-		m_radius = MathHelper::Clamp(m_radius, 1.0f, 15.0f);
-	}
-	else
-	{
-		// update radius
-		m_translation.x += 0.001 * GET_WHEEL_DELTA_WPARAM(btnState);
-
-		// restric the radius
-		m_translation.x = MathHelper::Clamp(m_translation.x, 1.0f, 15.0f);
-	}
-	
+{	
+	camera.MoveForward(0.001 * GET_WHEEL_DELTA_WPARAM(btnState));
 }
 
 void CubeApp::OnKeyDown(WPARAM btnState)
@@ -257,25 +241,8 @@ void CubeApp::OnKeyUp(WPARAM btnState)
 
 void CubeApp::UpdateCamera(const GameTimer& gt)
 {
-	if (m_controlCentered)
-	{
-		// spherical -> cartesian coordinates
-		m_eyePos.x = m_radius * sinf(m_phi) * cosf(m_theta);
-		m_eyePos.y = m_radius * cosf(m_phi);
-		m_eyePos.z = m_radius * sinf(m_phi) * sinf(m_theta);
-
-		// build the view matrix
-		DirectX::XMVECTOR pos = DirectX::XMVectorSet(m_eyePos.x, m_eyePos.y, m_eyePos.z, 1.0f);
-		DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		DirectX::XMVECTOR target = DirectX::XMVectorZero();
-		DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(pos, target, up);
-		DirectX::XMStoreFloat4x4(&m_view, view);
-	}
-	else
-	{
-		camera.MoveForward((m_wpressed ? 0.005f : 0.0f) + (m_spressed ? -0.005f : 0.0f));
-		camera.MoveRight((m_dpressed ? 0.005f : 0.0f) + (m_apressed ? -0.005f : 0.0f));
-	}
+	camera.MoveForward((m_wpressed ? 0.01f : 0.0f) + (m_spressed ? -0.01f : 0.0f));
+	camera.MoveRight((m_dpressed ? 0.01f : 0.0f) + (m_apressed ? -0.01f : 0.0f));
 	
 }
 
@@ -302,9 +269,10 @@ void CubeApp::UpdateObjectCBs(const GameTimer& gt)
 
 void CubeApp::UpdateMainPassCB(const GameTimer& gt)
 {
-	DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_view);
-	DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_proj);
-
+	//DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_view);
+	//DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_proj);
+	DirectX::XMMATRIX view = camera.getView();
+	DirectX::XMMATRIX proj = camera.getProj();
 	DirectX::XMMATRIX viewProj = DirectX::XMMatrixMultiply(view, proj);
 	DirectX::XMMATRIX invView = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(view), view);
 	DirectX::XMMATRIX invProj = DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(proj), proj);

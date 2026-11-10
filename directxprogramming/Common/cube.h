@@ -40,9 +40,9 @@ public:
 	virtual void InitDX12()override;
 	virtual void Destroy()override;
 
-	void swapControlMode()
+	void swapControlMode(bool isFreecam)
 	{
-		m_controlCentered = !m_controlCentered;
+		camera.switchMode(true);
 	}
 
 private:

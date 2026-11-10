@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include <algorithm>
 using namespace DirectX;
 
 void Camera::SetLens(float nearZ, float farZ, float fovY, float aspect)
@@ -67,9 +68,22 @@ void Camera::MoveForward(float d)
 	XMVECTOR P = XMLoadFloat3(&m_pos);
 	XMVECTOR L = XMLoadFloat3(&m_look);
 	XMVECTOR U = XMLoadFloat3(&m_up);
-	XMVECTOR f = XMVectorReplicate(d);
+	if (m_freecam)
+	{
+		XMVECTOR f = XMVectorReplicate(d);
+		P = XMVectorMultiplyAdd(f, L, P);
+	}
+	else
+	{ 
+		float prevR = m_radius;
+		m_radius -= d; std::max(1.0f, m_radius); 
+		float diff = prevR - m_radius;
+		XMVECTOR f = XMVectorReplicate(diff);
+		P = XMVectorMultiplyAdd(f, L, P);
 
-	P = XMVectorMultiplyAdd(f, L, P);
+	}
+
+	
 	XMMATRIX view = XMMatrixLookAtLH(P, XMVectorAdd(L, P), U);
 
 	XMStoreFloat4x4(&m_view, view);
@@ -81,9 +95,22 @@ void Camera::MoveRight(float d)
 	XMVECTOR P = XMLoadFloat3(&m_pos);
 	XMVECTOR U = XMLoadFloat3(&m_up);
 	XMVECTOR R = XMLoadFloat3(&m_right);
-	XMVECTOR r = XMVectorReplicate(d);
+	
 
-	P = XMVectorMultiplyAdd(r, R, P);
+	if (m_freecam)
+	{
+		XMVECTOR r = XMVectorReplicate(d);
+		P = XMVectorMultiplyAdd(r, R, P);
+	}
+	else
+	{
+		XMVECTOR radVec = XMVectorReplicate(m_radius);
+		XMVECTOR Center = XMVectorMultiplyAdd(radVec, R, P);
+		XMMATRIX M = XMMatrixTranslationFromVector(-Center)*XMMatrixRotationRollPitchYaw(0, 0, d) * XMMatrixTranslationFromVector(Center);
+		P = XMVector3TransformNormal(P, M);
+	}
+
+	
 	XMMATRIX view = XMMatrixLookAtLH(P, XMVectorAdd(L, P), U);
 
 	XMStoreFloat4x4(&m_view, view);
@@ -91,12 +118,30 @@ void Camera::MoveRight(float d)
 }
 void Camera::MoveUp(float d)
 {
-	XMVECTOR L = XMLoadFloat3(&m_look);
+	XMVECTOR R = XMLoadFloat3(&m_right);
 	XMVECTOR P = XMLoadFloat3(&m_pos);
 	XMVECTOR U = XMLoadFloat3(&m_up);
-	XMVECTOR u = XMVectorReplicate(d);
+	XMVECTOR L = XMLoadFloat3(&m_look);
+	
 
-	P = XMVectorMultiplyAdd(u, U, P);
+	if (m_freecam)
+	{
+		XMVECTOR u = XMVectorReplicate(d);
+		P = XMVectorMultiplyAdd(u, U, P);
+	}
+	else
+	{
+		XMVECTOR radVec = XMVectorReplicate(m_radius);
+		XMVECTOR Center = XMVectorMultiplyAdd(radVec, U, P);
+		XMMATRIX M = XMMatrixTranslationFromVector(-Center) * XMMatrixRotationRollPitchYaw(0, d, 0) * XMMatrixTranslationFromVector(Center);
+		P = XMVector3TransformNormal(P, M);
+		R = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&m_worldUp), L));
+		U = XMVector3Normalize(XMVector3Cross(L, R));
+		XMStoreFloat3(&m_right, R);
+		XMStoreFloat3(&m_up, U);
+	}
+
+	
 	XMMATRIX view = XMMatrixLookAtLH(P, L, U);
 
 	XMStoreFloat4x4(&m_view, view);

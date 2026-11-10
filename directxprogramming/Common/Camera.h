@@ -32,9 +32,30 @@ public:
 		return XMLoadFloat4x4(&m_view);
 	}
 
+	void setView(DirectX::FXMMATRIX view)
+	{
+		DirectX::XMStoreFloat4x4(&m_view, view);
+	}
+
 	DirectX::XMMATRIX getProj() const
 	{
 		return XMLoadFloat4x4(&m_proj);
+	}
+
+	void setProj(DirectX::FXMMATRIX proj)
+	{
+		DirectX::XMStoreFloat4x4(&m_proj, proj);
+	}
+
+	void switchMode(bool isFreecam)
+	{
+		m_freecam = isFreecam;
+
+	}
+
+	bool getMode()
+	{
+		return m_freecam;
 	}
 
 private:
@@ -53,5 +74,9 @@ private:
 	float m_fovy = 0.0f;
 	float m_nearwinheight = 0.0f;
 	float m_farwinheight = 0.0f;
+
+	bool m_freecam = false;
+
+	float m_radius = 5.0f;
 
 };

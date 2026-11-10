@@ -16,7 +16,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	try
 	{
 		CubeApp win(width, height, aspectRatio);
-		//win.swapControlMode();
+		win.swapControlMode(true);
 
 		if (!win.Create(
 			L"Yeah", WS_OVERLAPPEDWINDOW, 0, CW_USEDEFAULT, CW_USEDEFAULT, width, height))
