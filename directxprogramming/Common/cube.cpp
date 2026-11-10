@@ -164,15 +164,17 @@ void CubeApp::OnMouseMove(WPARAM btnState, int x, int y)
 		float dx = DirectX::XMConvertToRadians(0.25f * static_cast<float>(x - m_lastMousePos.x));
 		float dy = DirectX::XMConvertToRadians(0.25f * static_cast<float>(y - m_lastMousePos.y));
 
-
-		camera.Rotate(dx, dy);
-
-		// update angles
-		m_theta += dx;
-		m_phi += dy;
-
-		// restrict m_phi
-		m_phi = MathHelper::Clamp(m_phi, 0.1f, DirectX::XM_PI - 0.1f);
+		if (camera.isFreecam())
+		{
+			camera.Rotate(dx, dy);
+			OutputDebugStringA(std::string("Freecam\n").c_str());
+		}
+		else
+		{
+			OutputDebugStringA(std::string("No Freecam\n").c_str());
+			camera.MoveRight(dx);
+			camera.MoveUp(dy);
+		}
 	}
 	else if ((btnState & MK_RBUTTON) != 0 && m_controlCentered)
 	{
@@ -198,9 +200,6 @@ void CubeApp::OnMouseWheelScroll(WPARAM btnState, int x, int y)
 
 void CubeApp::OnKeyDown(WPARAM btnState)
 {
-	if (m_controlCentered) { return; }
-
-
 	if (btnState == 'W')
 	{
 		m_wpressed = true;

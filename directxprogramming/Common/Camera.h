@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
-
+#include "Windows.h"
+#include <string>
 
 class Camera
 {
@@ -50,10 +51,15 @@ public:
 	void switchMode(bool isFreecam)
 	{
 		m_freecam = isFreecam;
-
+		
+		if (!m_freecam)
+		{
+			DirectX::XMStoreFloat3(&pivot, DirectX::XMVectorMultiplyAdd(DirectX::XMVectorReplicate(m_radius), DirectX::XMLoadFloat3(&m_look), DirectX::XMLoadFloat3(&m_pos)));
+			OutputDebugStringA(std::string("LALALA").c_str());
+		}
 	}
 
-	bool getMode()
+	bool isFreecam()
 	{
 		return m_freecam;
 	}
@@ -78,5 +84,7 @@ private:
 	bool m_freecam = false;
 
 	float m_radius = 5.0f;
+	float m_phi = DirectX::XM_PIDIV4;
+	DirectX::XMFLOAT3 pivot{ 0,0,0 };
 
 };

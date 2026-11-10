@@ -76,7 +76,7 @@ void Camera::MoveForward(float d)
 	else
 	{ 
 		float prevR = m_radius;
-		m_radius -= d; std::max(1.0f, m_radius); 
+		m_radius -= d; m_radius = max(1.0f, m_radius); 
 		float diff = prevR - m_radius;
 		XMVECTOR f = XMVectorReplicate(diff);
 		P = XMVectorMultiplyAdd(f, L, P);
@@ -105,9 +105,15 @@ void Camera::MoveRight(float d)
 	else
 	{
 		XMVECTOR radVec = XMVectorReplicate(m_radius);
-		XMVECTOR Center = XMVectorMultiplyAdd(radVec, R, P);
-		XMMATRIX M = XMMatrixTranslationFromVector(-Center)*XMMatrixRotationRollPitchYaw(0, 0, d) * XMMatrixTranslationFromVector(Center);
+		XMVECTOR Center = XMLoadFloat3(&pivot);
+		XMMATRIX M = XMMatrixTranslationFromVector(-Center)*XMMatrixRotationRollPitchYaw(0, d, 0) * XMMatrixTranslationFromVector(Center);
 		P = XMVector3TransformNormal(P, M);
+		R = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&m_worldUp), L));
+		U = XMVector3Normalize(XMVector3Cross(L, R));
+		L = XMVector3Normalize(XMVectorSubtract(Center, P));
+		XMStoreFloat3(&m_right, R);
+		XMStoreFloat3(&m_up, U);
+		XMStoreFloat3(&m_look, L);
 	}
 
 	
@@ -132,13 +138,20 @@ void Camera::MoveUp(float d)
 	else
 	{
 		XMVECTOR radVec = XMVectorReplicate(m_radius);
-		XMVECTOR Center = XMVectorMultiplyAdd(radVec, U, P);
-		XMMATRIX M = XMMatrixTranslationFromVector(-Center) * XMMatrixRotationRollPitchYaw(0, d, 0) * XMMatrixTranslationFromVector(Center);
+		XMVECTOR Center = XMLoadFloat3(&pivot);
+		float prevphi = m_phi;
+		m_phi += d;
+		m_phi = max(min(m_phi, XM_PI - 0.1f), 0.1f);
+		float dphi = m_phi - prevphi;
+		XMMATRIX M = XMMatrixTranslationFromVector(-Center) * XMMatrixRotationRollPitchYaw(0, 0, dphi) * XMMatrixTranslationFromVector(Center);
 		P = XMVector3TransformNormal(P, M);
 		R = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&m_worldUp), L));
 		U = XMVector3Normalize(XMVector3Cross(L, R));
+		L = XMVector3Normalize(XMVectorSubtract(Center, P));
 		XMStoreFloat3(&m_right, R);
 		XMStoreFloat3(&m_up, U);
+		XMStoreFloat3(&m_look, L);
+		
 	}
 
 	

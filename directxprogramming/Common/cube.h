@@ -42,7 +42,7 @@ public:
 
 	void swapControlMode(bool isFreecam)
 	{
-		camera.switchMode(true);
+		camera.switchMode(isFreecam);
 	}
 
 private:
