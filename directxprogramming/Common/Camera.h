@@ -84,7 +84,7 @@ private:
 	bool m_freecam = false;
 
 	float m_radius = 5.0f;
-	float m_phi = DirectX::XM_PIDIV4;
+	float m_phi = DirectX::XM_PIDIV2;
 	DirectX::XMFLOAT3 pivot{ 0,0,0 };
 
 };

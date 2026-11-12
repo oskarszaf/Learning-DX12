@@ -228,13 +228,13 @@ public:
 			DirectX::XMVECTOR n = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(e1, e2));
 			//printVEC4(n);
 
-			DirectX::XMVECTOR na = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(0)).color), n);
+			DirectX::XMVECTOR na = DirectX::XMVectorAbs(DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(0)).color), n));
 			DirectX::XMStoreFloat4(&vertexBuffer.at(face.at(0)).color, na);
 
-			DirectX::XMVECTOR nb = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(1)).color), n);
+			DirectX::XMVECTOR nb = DirectX::XMVectorAbs(DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(1)).color), n));
 			DirectX::XMStoreFloat4(&vertexBuffer.at(face.at(1)).color, nb);
 
-			DirectX::XMVECTOR nc = DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(2)).color), n);
+			DirectX::XMVECTOR nc = DirectX::XMVectorAbs(DirectX::XMVectorAdd(DirectX::XMLoadFloat4(&vertexBuffer.at(face.at(2)).color), n));
 			DirectX::XMStoreFloat4(&vertexBuffer.at(face.at(2)).color, nc);
 
 		}
@@ -249,6 +249,7 @@ public:
 	}
 
 	private:
+
 		std::vector<std::string> splitstr(std::string str, char d)
 		{
 			std::string strt = str;

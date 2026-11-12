@@ -167,11 +167,11 @@ void CubeApp::OnMouseMove(WPARAM btnState, int x, int y)
 		if (camera.isFreecam())
 		{
 			camera.Rotate(dx, dy);
-			OutputDebugStringA(std::string("Freecam\n").c_str());
+			//OutputDebugStringA(std::string("Freecam\n").c_str());
 		}
 		else
 		{
-			OutputDebugStringA(std::string("No Freecam\n").c_str());
+			//OutputDebugStringA(std::string("No Freecam\n").c_str());
 			camera.MoveRight(dx);
 			camera.MoveUp(dy);
 		}
@@ -438,8 +438,8 @@ void CubeApp::BuildShadersAndInputLayout()
 // GEOMETRY BUILT HERE
 void CubeApp::BuildGeometry()
 {
-
-	Object cube;
+	GeometryGen gg;
+	Object cube;// = gg.ElipseCone(1, 1, 2, 10);
 	cube.getObjectFromObj("Objects\\stanford-bunny.obj");
 	cube.calculateNormalsFromIndexBufferTreatAsColors();	
 	//DirectX::XMStoreFloat4x4(&m_world, DirectX::XMMatrixAffineTransformation(DirectX::XMVECTOR{ 10.0f, 10.0f, 10.0f }, DirectX::XMVECTOR{ 0,0,0 }, DirectX::XMVECTOR{ 0,0,0 }, DirectX::XMVECTOR{ 0,-1,0 }));

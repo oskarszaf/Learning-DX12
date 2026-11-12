@@ -1,7 +1,7 @@
 #pragma once
 #include "d3dApp.h"
 #include "UploadBuffer.h"
-#include "../ObjectUtils/objutils.h"
+#include "../ObjectUtils/GeometryGen.h"
 #include "Camera.h"
 #include "FrameResource.h"
 

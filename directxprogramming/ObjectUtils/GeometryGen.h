@@ -9,13 +9,9 @@ public:
 	Object Sphere(float r);
 	Object Elipsoid(float a, float b, float c);
 
-	Object Cylinder(float r, float h);
-	Object ElipseCylinder(float a, float b, float h);
+	Object Cylinder(float r, float h, float n);
+	Object ElipseCylinder(float a, float b, float h, float n);
 
-	Object Cone(float r, float h);
-	Object ElipseCone(float a, float b, float h);
-
-private:
-	void CreateQuad(Object& object, DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b, DirectX::XMFLOAT3 c, DirectX::XMFLOAT3 d); // abc, acd!
-	std::vector<DirectX::XMFLOAT3> CreateTriangle(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b, DirectX::XMFLOAT3 c);
+	Object Cone(float r, float h, float n);
+	Object ElipseCone(float a, float b, float h, float n);
 };
