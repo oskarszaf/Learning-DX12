@@ -30,6 +30,7 @@
     <ClInclude Include="Common\GameTimer.h" />
     <ClInclude Include="Common\MathHelper.h" />
     <ClInclude Include="Common\UploadBuffer.h" />
+    <ClInclude Include="ObjectUtils\GeometryGen.h" />
     <ClInclude Include="ObjectUtils\objutils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -42,6 +43,7 @@
     <ClCompile Include="Common\FrameResource.cpp" />
     <ClCompile Include="Common\GameTimer.cpp" />
     <ClCompile Include="Common\MathHelper.cpp" />
+    <ClCompile Include="ObjectUtils\GeometryGen.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
